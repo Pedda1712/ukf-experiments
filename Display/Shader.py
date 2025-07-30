@@ -39,7 +39,8 @@ void main () {
   vec4 raw_dir = view * vec4(-1, 0, 1, 0.0);
   vec3 direction = normalize(raw_dir.xyz);
 
-  vec3 color = color * max(0.25, getCombinedColor());
+  float texture = max(0.25, getCombinedColor());
+  vec3 color = color * texture;
 
   vec3 py = normalize(dFdy(pos));
   vec3 px = normalize(dFdx(pos));
@@ -48,7 +49,7 @@ void main () {
   vec3 view = normalize(pos);
   vec3 reflectDir = reflect(-direction, norm);  
 
-  float spec = max(dot(view, reflectDir), 0.0);
+  float spec = max(dot(view, reflectDir), 0.0) * texture;
   float diff = (dot(direction, norm) + 1.0) * 0.5f;
 
   gl_FragColor = vec4(diff * color + pow(spec, 64.0) * vec3(1.0, 1.0, 1.0), 1.0);
