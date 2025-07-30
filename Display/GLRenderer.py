@@ -89,6 +89,28 @@ class GLRenderer():
         glVertex3f(-1, -1,  1 )
         glEnd()
 
+    def drawCamera(self, observer: Observer):
+        glPushMatrix()
+
+        mat1 = glm.rotate(glm.mat4(), glm.radians(observer.camera_yaw), glm.vec3(0, 1, 0))
+        mat2 = glm.rotate(glm.mat4(), glm.radians(observer.camera_pitch), glm.vec3(1, 0, 0))
+        mat3 = glm.translate(glm.mat4(), glm.vec3(0, 0, -observer.camera_dist))
+        mat = glm.inverse(mat3 * mat2 * mat1)
+        glLoadMatrixf(mat.to_list())
+
+        glRotate(180, 0, 1, 0)
+        
+        glPushMatrix()
+        glTranslate(0, 0, -1)
+        self.drawCube(color = (1, 0, 0))
+        glPopMatrix()
+        glPushMatrix()
+        glScale(1.3, 1.3, 0.3)
+        glTranslate(0, 0, 1)
+        self.drawCube(color = (1, 0, 0))
+        glPopMatrix()
+
+        glPopMatrix()
     
     def drawBackWalls(self, world: BallWorldInfo):
         glPushMatrix()
@@ -111,6 +133,7 @@ class GLRenderer():
         glTranslate(-1, 0, 0)
         self.drawCube(color = (1, 0, 1))
         glPopMatrix()
+
         glPopMatrix()
 
     def drawBall(self, ball: Ball, color: tuple[float, float, float], world: BallWorldInfo):

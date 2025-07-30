@@ -37,7 +37,7 @@ class Display():
         self.renderer = GLRenderer(self.config)
         self.camera = Camera()
 
-    def display(self, world: BallWorldInfo, ball: Ball) -> bool:
+    def display(self, world: BallWorldInfo, ball: list[Ball] = [], observers: list[Observer] = []) -> bool:
         self.dt = self.clock.tick(60) / 1000
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -52,6 +52,8 @@ class Display():
         self.renderer.drawBackWalls(world)
         for (b, c) in zip(ball, [(0, 0, 1), (0, 1, 0), (1, 0, 0)]):
             self.renderer.drawBall(b, c, world)
+        for observer in observers:
+            self.renderer.drawCamera(observer)
         self.renderer.endPass()
 
         pygame.display.flip()
