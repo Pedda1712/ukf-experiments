@@ -89,7 +89,7 @@ class GLRenderer():
         glVertex3f(-1, -1,  1 )
         glEnd()
 
-    def drawCamera(self, observer: Observer):
+    def drawCamera(self, observer: Observer, color: tuple[float, float, float], size: float):
         glPushMatrix()
 
         mat1 = glm.rotate(glm.mat4(), glm.radians(observer.camera_yaw), glm.vec3(0, 1, 0))
@@ -98,16 +98,17 @@ class GLRenderer():
         mat = glm.inverse(mat3 * mat2 * mat1)
         glLoadMatrixf(mat.to_list())
 
+        glScale(size, size, size)
         glRotate(180, 0, 1, 0)
         
         glPushMatrix()
         glTranslate(0, 0, -1)
-        self.drawCube(color = (1, 0, 0))
+        self.drawCube(color = color)
         glPopMatrix()
         glPushMatrix()
         glScale(1.3, 1.3, 0.3)
         glTranslate(0, 0, 1)
-        self.drawCube(color = (1, 0, 0))
+        self.drawCube(color = color)
         glPopMatrix()
 
         glPopMatrix()

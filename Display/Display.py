@@ -9,7 +9,7 @@ from World import BallWorldInfo, Ball
 
 class Camera:
     def __init__(self):
-        self.observer = Observer()
+        self.observer = Observer(75, 45, -45)
         self.camera_speed = 20
         self.camera_turn_speed = 100
 
@@ -37,7 +37,7 @@ class Display():
         self.renderer = GLRenderer(self.config)
         self.camera = Camera()
 
-    def display(self, world: BallWorldInfo, ball: list[Ball] = [], observers: list[Observer] = []) -> bool:
+    def display(self, world: BallWorldInfo, ball: list[Ball] = [], observers: list[Observer] = [], assumed_observers: list[Observer] = []) -> bool:
         self.dt = self.clock.tick(60) / 1000
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -53,7 +53,9 @@ class Display():
         for (b, c) in zip(ball, [(0, 0, 1), (0, 1, 0), (1, 0, 0)]):
             self.renderer.drawBall(b, c, world)
         for observer in observers:
-            self.renderer.drawCamera(observer)
+            self.renderer.drawCamera(observer, color=(0, 0, 1), size=0.5)
+        for observer in assumed_observers:
+            self.renderer.drawCamera(observer, color=(0, 1, 0), size=0.6)
         self.renderer.endPass()
 
         pygame.display.flip()

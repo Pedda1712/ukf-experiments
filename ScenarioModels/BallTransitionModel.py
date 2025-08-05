@@ -17,7 +17,8 @@ class BallTransitionModel(TransitionModel):
         return self.Q
 
     def transition(self, states: np.ndarray, noise: np.ndarray, delta: float) -> np.ndarray:
-        balls = [Ball(s[0:3], s[3:6] + q) for (s, q) in zip(states, noise)]
+        balls = [Ball(s[0:3], s[3:6] + q[0:3]) for (s, q) in zip(states, noise)]
         balls = self._transition.transition(balls, delta)
-        return np.array([np.append(np.array(b.pos), np.array(b.velocity)) for b in balls])
+        rest = states[:, 6:] + noise[:, 3:]
+        return np.hstack((np.array([np.append(np.array(b.pos), np.array(b.velocity)) for b in balls]), rest))
         
