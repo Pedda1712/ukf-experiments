@@ -26,5 +26,5 @@ class UKFPredictor:
         
         Y = self.f.transition(states, noises, delta)
 
-        m, P, _ = transformed_sigma_points_to_gaussian(Y, Wm, Wc)
-        return m, P
+        m, P, D = transformed_sigma_points_to_gaussian(Y, Wm, Wc, states)
+        return m, P, D

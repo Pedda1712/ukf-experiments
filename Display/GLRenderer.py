@@ -34,7 +34,7 @@ class GLRenderer():
         glMatrixMode(GL_PROJECTION)
         glPushMatrix()
         glLoadIdentity()
-        gluPerspective(45, (self.config.dimensions[0]/self.config.dimensions[1]), 0.1, 500)
+        gluPerspective(self.config.half_fov, (self.config.dimensions[0]/self.config.dimensions[1]), 0.1, 500)
 
         glMatrixMode(GL_MODELVIEW)
         glPushMatrix()
@@ -98,6 +98,8 @@ class GLRenderer():
         mat = glm.inverse(mat3 * mat2 * mat1)
         glLoadMatrixf(mat.to_list())
 
+        fovscale = observer.camera_half_fov / 45
+
         glScale(size, size, size)
         glRotate(180, 0, 1, 0)
         
@@ -106,7 +108,7 @@ class GLRenderer():
         self.drawCube(color = color)
         glPopMatrix()
         glPushMatrix()
-        glScale(1.3, 1.3, 0.3)
+        glScale(1.3 * fovscale, 1.3 * fovscale, 0.3)
         glTranslate(0, 0, 1)
         self.drawCube(color = color)
         glPopMatrix()

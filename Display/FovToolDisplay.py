@@ -9,17 +9,18 @@ from .GLRenderer import GLRenderer
 from World import BallWorldInfo, Ball
 
 
-class Display():
+class FovToolDisplay():
 
-    def __init__(self, config: DisplayConfig):
+    def __init__(self, config: DisplayConfig, initial_observer: Observer):
         self.config = config
         self.clock = pygame.time.Clock()
         pygame.init()
         pygame.display.set_mode(self.config.dimensions, DOUBLEBUF|OPENGL)
         self.renderer = GLRenderer(self.config)
         self.camera = Camera()
+        self.camera.observer = initial_observer
 
-    def display(self, world: BallWorldInfo, ball: list[Ball] = [], observers: list[Observer] = [], assumed_observers: list[Observer] = []) -> bool:
+    def display(self, world: BallWorldInfo) -> bool:
         self.dt = self.clock.tick(60) / 1000
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -32,12 +33,6 @@ class Display():
         self.renderer.beginPass()
         self.renderer.setObserver(self.camera.observer)
         self.renderer.drawBackWalls(world)
-        for (b, c) in zip(ball, [(0, 0, 1), (0, 1, 0), (1, 0, 0)]):
-            self.renderer.drawBall(b, c, world)
-        for observer in observers:
-            self.renderer.drawCamera(observer, color=(0, 0, 1), size=0.5)
-        for observer in assumed_observers:
-            self.renderer.drawCamera(observer, color=(0, 1, 0), size=0.5)
         self.renderer.endPass()
 
         pygame.display.flip()

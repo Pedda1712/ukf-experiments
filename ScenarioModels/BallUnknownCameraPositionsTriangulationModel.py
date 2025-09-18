@@ -23,22 +23,25 @@ class BallUnknownCameraPositionsTriangulationModel(BallTriangulationModel):
         self.reference_point = reference_viewpoint
 
     def measure(self, states: np.ndarray, noises: np.ndarray) -> np.ndarray:
-        project = glm.perspective(glm.radians(45), 1, 0.01, 500)
-        num_estimated = int((states.shape[1] - 6) / 3)
+        num_estimated = int((states.shape[1] - 6) / 4)
         projected_points = []
+        print(states[:, :8][:, 4:])
+        print("-")
         for s in states:
             pre_projection = np.concat((s[0:3], np.ones(1))).reshape(-1, 1)
             viewpoints = [self.reference_point]
             # construct the viewpoints of this state
             for n in range(num_estimated):
-                start_index = 6 + n * 3
+                start_index = 6 + n * 4
                 pitch = s[start_index]
                 yaw = s[start_index+1]
                 dist = s[start_index+2]
-                viewpoints.append(Observer(dist, pitch, yaw))
+                fov = s[start_index+3]
+                viewpoints.append(Observer(dist, pitch, yaw, fov))
             # project the ball position into those viewpoints
             projected_point = []
             for viewpoint in viewpoints:
+                project = glm.perspective(glm.radians(viewpoint.camera_half_fov), 1, 0.01, 500)
                 viewmat = self.get_viewpoint(viewpoint)
                 proj_view = np.array(project * viewmat) 
                 projection = (proj_view @ pre_projection).T

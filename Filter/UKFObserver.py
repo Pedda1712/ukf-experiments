@@ -9,9 +9,9 @@ class UKFObserver:
     def __init__(self, h: MeasurementModel, parameters: SigmaPointGenerationConfig = SigmaPointGenerationConfig()):
         self.h = h
         self.config = parameters
-    
-    def observe(self, m_predict: np.ndarray, P_predict: np.ndarray, y_observe: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-        m_predict_ex, P_predict_ex = extend_state_by_normal_noise(m_predict, P_predict, self.h.get_noise())
+
+    def observe(self, m_predict: np.ndarray, P_predict: np.ndarray, y_observe: np.ndarray, observation_uncertainty: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        m_predict_ex, P_predict_ex = extend_state_by_normal_noise(m_predict, P_predict, observation_uncertainty)
         X, Wm, Wc = sigma_points(m_predict_ex, P_predict_ex, self.config)
 
         X = np.array(X)
@@ -24,7 +24,7 @@ class UKFObserver:
         mu, S, C = transformed_sigma_points_to_gaussian(Y, Wm, Wc, states)
 
         # now the rules for gaussian conditioning apply
-        K = C @ np.linalg.inv(S) # filter gain
+        K = C @ np.linalg.pinv(S) # filter gain
         m = m_predict + K @ (y_observe - mu)
         P = P_predict - K @ S @ K.T
         return m, P
