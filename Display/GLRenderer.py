@@ -51,6 +51,8 @@ class GLRenderer():
     def setObserver(self, observer: Observer):
         glPushMatrix()
         glLoadIdentity()
+        glRotatef(observer.camera_fine_pitch, 1, 0, 0)
+        glRotatef(observer.camera_fine_yaw, 0, 1, 0)
         glTranslatef(0, 0, -observer.camera_dist)
         glRotatef(observer.camera_pitch, 1, 0, 0)
         glRotatef(observer.camera_yaw, 0, 1, 0)
@@ -95,7 +97,9 @@ class GLRenderer():
         mat1 = glm.rotate(glm.mat4(), glm.radians(observer.camera_yaw), glm.vec3(0, 1, 0))
         mat2 = glm.rotate(glm.mat4(), glm.radians(observer.camera_pitch), glm.vec3(1, 0, 0))
         mat3 = glm.translate(glm.mat4(), glm.vec3(0, 0, -observer.camera_dist))
-        mat = glm.inverse(mat3 * mat2 * mat1)
+        mat4 = glm.rotate(glm.mat4(), glm.radians(observer.camera_fine_yaw), glm.vec3(0, 1, 0))
+        mat5 = glm.rotate(glm.mat4(), glm.radians(observer.camera_fine_pitch), glm.vec3(1, 0, 0))
+        mat = glm.inverse(mat5 * mat4 * mat3 * mat2 * mat1)
         glLoadMatrixf(mat.to_list())
 
         fovscale = observer.camera_half_fov / 45

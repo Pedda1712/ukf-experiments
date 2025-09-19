@@ -6,3 +6,5 @@ class Observer:
     camera_pitch: float = 0
     camera_yaw: float = 0
     camera_half_fov: float = 45
+    camera_fine_pitch: float = 0
+    camera_fine_yaw: float = 0

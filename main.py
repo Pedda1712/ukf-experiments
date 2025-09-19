@@ -32,7 +32,7 @@ def run_experiment(config: BallExperimentConfig):
     smoother = Smoother(config.assumed_measurement_model, config.transition_model, config.prior_mean, config.prior_covariance)
 
     # record some measurments
-    RECORD_FRAMES = 1500
+    RECORD_FRAMES = 5000
     measurements = []
     measurement_covariances = []
     deltas = []
@@ -69,37 +69,37 @@ def run_experiment(config: BallExperimentConfig):
     plt.show()
 
 def get_pitch_yaws(mean: np.ndarray, known: Observer):
-    result = [(known.camera_pitch, known.camera_yaw, known.camera_dist, mean[6])]
-    num_cams = int((mean.shape[0] - 7) / 3)
+    result = [(known.camera_pitch, known.camera_yaw, known.camera_dist, mean[6], known.camera_fine_pitch, known.camera_fine_yaw)]
+    num_cams = int((mean.shape[0] - 7) / 5)
     for n in range(num_cams):
-        s = 6 + 1 + n*3
-        result.append((mean[s], mean[s+1], mean[s+2], mean[6]))
+        s = 6 + 1 + n*5
+        result.append((mean[s], mean[s+1], mean[s+2], mean[6], mean[s+3], mean[s+4]))
     return result
 
 if __name__ == "__main__":
     world = BallWorldInfo()
     actual_observer_list = [
-        Observer(25, 0, 0, 35),
-        Observer(15, 90, 0, 35),
-        Observer(35, 0, -90, 35),
-        Observer(55, 0, -45, 35),
+        Observer(25, 0, 0, 45, 0, 0),
+        Observer(15, 90, 0, 45, 5, -10),
+        Observer(35, 0, -90, 45, 0, -5),
+        Observer(55, 0, -45, 45, 10, 5),
     ]
     ball_transition_variance = 0.01
     camera_transition_variance = 0.001
     assumed_measurement_variance = 0.01
     actual_measurement_variance = 0.01
     ball_prior_variance = 10
-    camera_prior_variance = 10
+    camera_prior_variance = 5
     config = BallExperimentConfig(
         world,
-        BallTransitionModel(world, np.hstack((np.ones(3)*ball_transition_variance, np.ones(10) * camera_transition_variance))),
+        BallTransitionModel(world, np.hstack((np.ones(3)*ball_transition_variance, np.ones(16) * camera_transition_variance))),
         BallUnknownCameraPositionsTriangulationModel(np.ones(8)*assumed_measurement_variance, actual_observer_list[0]),
         BallTriangulationModel(np.ones(8)*actual_measurement_variance, actual_observer_list),
         Ball([0, 0, 0], [20, 9, 13]),
-        np.hstack((np.zeros(6), np.array([45, 85, -5, 20, 5, -100, 30, -5, -50, 60]))),
-        np.diag(np.hstack((np.ones(6)*ball_prior_variance,np.ones(10)*camera_prior_variance))),
+        np.hstack((np.zeros(6), np.array([45, 85, -5, 20, 0, 0, 5, -100, 30, 0, 0, -5, -50, 60, 0, 0]))),
+        np.diag(np.hstack((np.ones(6)*ball_prior_variance,np.ones(16)*camera_prior_variance))),
         actual_observer_list,
         lambda m: m[0:3].tolist(),
-        lambda m: [Observer(dist, pitch, yaw, fov) for (pitch, yaw, dist, fov) in get_pitch_yaws(m, actual_observer_list[0])]
+        lambda m: [Observer(dist, pitch, yaw, fov, fpitch, fyaw) for (pitch, yaw, dist, fov, fpitch, fyaw) in get_pitch_yaws(m, actual_observer_list[0])]
     )
     run_experiment(config)

@@ -24,15 +24,15 @@ class BallUnknownCameraPositionsTriangulationModel(BallTriangulationModel):
         self.reference_point = reference_viewpoint
 
     def measure(self, states: np.ndarray, noises: np.ndarray) -> np.ndarray:
-        num_estimated = int((states.shape[1] - 6 - 1) / 3)
+        num_estimated = int((states.shape[1] - 6 - 1) / 5)
         projected_points = []
         # build maps of observers for each viewpoint
         viewpoint_maps = [dict() for _ in range(num_estimated)]
         for n in range(num_estimated):
-            proto_observers = np.unique(np.concat((states[:, (6+1):][:, (n*3):((n+1)*3)], states[:, 6].reshape(-1,1)), axis=1), axis=0)
+            proto_observers = np.unique(np.concat((states[:, (6+1):][:, (n*5):((n+1)*5)], states[:, 6].reshape(-1,1)), axis=1), axis=0)
             for po in proto_observers:
-                (pitch, yaw, dist, fov) = po
-                glm_view = self._get_viewpoint(pitch, yaw, dist)
+                (pitch, yaw, dist, fpitch, fyaw, fov) = po
+                glm_view = self._get_viewpoint(pitch, yaw, dist, fpitch, fyaw)
                 glm_proj = glm.perspective(glm.radians(fov), 1, 0.01, 500)
                 viewpoint_maps[n][po.tobytes()] = np.array(glm_proj * glm_view)
 
@@ -48,7 +48,7 @@ class BallUnknownCameraPositionsTriangulationModel(BallTriangulationModel):
             reference = (self.reference_proj_view @ pre_projection).T
             projected_point = [reference[0, 0:2] / reference[0, 3]]
             for n in range(num_estimated):
-                po = np.concat((s[(6+1):][(n*3):((n+1)*3)], [s[6]]))
+                po = np.concat((s[(6+1):][(n*5):((n+1)*5)], [s[6]]))
                 proj_view = viewpoint_maps[n][po.tobytes()]
                 projection = None
                 if (not po.tobytes() in already_projected_maps[n]) or (not pre_projection.tobytes() in already_projected_maps[n][po.tobytes()]):
@@ -60,5 +60,6 @@ class BallUnknownCameraPositionsTriangulationModel(BallTriangulationModel):
                 else:
                     projected_point.append(already_projected_maps[n][po.tobytes()][pre_projection.tobytes()])
             projected_points.append(np.hstack(projected_point))
+
         return np.array(projected_points) + noises
 

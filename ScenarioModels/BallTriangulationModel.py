@@ -21,13 +21,15 @@ class BallTriangulationModel(MeasurementModel):
         self.viewpoints = viewpoints
     def get_noise(self) -> np.ndarray:
         return self.R
-    def _get_viewpoint(self, pitch, yaw, dist):
+    def _get_viewpoint(self, pitch, yaw, dist, fine_pitch, fine_yaw):
         mat1 = glm.rotate(glm.mat4(), glm.radians(yaw), glm.vec3(0, 1, 0))
         mat2 = glm.rotate(glm.mat4(), glm.radians(pitch), glm.vec3(1, 0, 0))
         mat3 = glm.translate(glm.mat4(), glm.vec3(0, 0, -dist))
-        return mat3 * mat2 * mat1
+        mat4 = glm.rotate(glm.mat4(), glm.radians(fine_yaw), glm.vec3(0, 1, 0))
+        mat5 = glm.rotate(glm.mat4(), glm.radians(fine_pitch), glm.vec3(1, 0, 0))
+        return mat5 * mat4 * mat3 * mat2 * mat1
     def get_viewpoint(self, observer: Observer):
-        return self._get_viewpoint(observer.camera_pitch, observer.camera_yaw, observer.camera_dist)
+        return self._get_viewpoint(observer.camera_pitch, observer.camera_yaw, observer.camera_dist, observer.camera_fine_pitch, observer.camera_fine_yaw)
     def measure(self, states: np.ndarray, noises: np.ndarray) -> np.ndarray:
 
         # projection matrix to use

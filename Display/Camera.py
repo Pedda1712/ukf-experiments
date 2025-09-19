@@ -22,3 +22,12 @@ class Camera:
             self.observer.camera_dist -= self.camera_speed * dt
         if keys[pygame.K_e]:
             self.observer.camera_dist += self.camera_speed * dt
+        if keys[pygame.K_k]:
+            self.observer.camera_fine_pitch += self.camera_turn_speed * dt
+        if keys[pygame.K_i]:
+            self.observer.camera_fine_pitch -= self.camera_turn_speed * dt
+        if keys[pygame.K_j]:
+            self.observer.camera_fine_yaw -= self.camera_turn_speed * dt
+        if keys[pygame.K_l]:
+            self.observer.camera_fine_yaw += self.camera_turn_speed * dt
+        
